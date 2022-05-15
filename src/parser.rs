@@ -1,8 +1,8 @@
 use anyhow::Result;
 use crate::message::*;
 
-pub struct MessageParseOutcome<'buf> {
-    remaining_buf: &'buf [u8],
+pub struct MessageParseOutcome {
+    bytes_consumed: u8,
     status: MessageParseOutcomeStatus,
 }
 
@@ -24,13 +24,13 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn parse<'buf>(&mut self, buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
+    pub fn parse(&mut self, buf: &[u8]) -> Result<MessageParseOutcome> {
         let mut buf_iter = buf.iter();
 
         match buf_iter.next().copied() {
             None => {
                 Ok(MessageParseOutcome {
-                    remaining_buf: buf_iter.as_slice(),
+                    bytes_consumed: 0,
                     status: MessageParseOutcomeStatus::NeedMoreBytes(None),
                 })
             }
@@ -43,7 +43,7 @@ impl Parser {
                     todo!()
                 } else {
                     Ok(MessageParseOutcome {
-                        remaining_buf: buf_iter.as_slice(),
+                        bytes_consumed: 1,
                         status: MessageParseOutcomeStatus::UnexpectedDataByte,
                     })
                 }
@@ -67,7 +67,7 @@ const CHANNEL_MODE_MESSAGE_SELECT: u8 = 0b1011;
 struct StatusByte(u8);
 
 impl StatusByte {
-    pub fn parse<'buf>(&self, buf: &'buf [u8]) -> Result<MessageParseOutcomeStatus> {
+    pub fn parse(&self, buf: &[u8]) -> Result<MessageParseOutcome> {
         todo!()
     }
 }
