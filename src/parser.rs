@@ -38,7 +38,16 @@ impl Parser {
                 const STATUS_BYTE_MASK: u8 = 0b10000000;
                 if first_byte & STATUS_BYTE_MASK != 0 {
                     let status_byte = StatusByte(first_byte);
-                    todo!()
+                    let outcome = status_byte.parse(buf_iter.as_slice())?;
+                    match outcome.status {
+                        MessageParseOutcomeStatus::Message(Message::Channel(_)) => {
+                            self.running_status_byte = Some(status_byte);
+                            todo!()
+                        },
+                        _ => {
+                            todo!()
+                        }
+                    }
                 } else if let Some(running_status_byte) = self.running_status_byte {
                     todo!()
                 } else {
