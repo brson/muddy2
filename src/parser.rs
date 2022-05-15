@@ -19,26 +19,32 @@ pub enum MessageParseOutcomeStatus {
     UnexpectedDataByte,
 }
 
-pub fn parse<'buf>(buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
-    let mut buf_iter = buf.iter();
+pub struct Parser {
+    running_status: Option<ChannelMessage>,
+}
 
-    match buf_iter.next().copied() {
-        None => {
-            Ok(MessageParseOutcome {
-                remaining_buf: buf_iter.as_slice(),
-                status: MessageParseOutcomeStatus::NeedMoreBytes(None),
-            })
-        }
-        Some(status_byte) => {
-            const STATUS_BYTE_MASK: u8 = 0b10000000;
-            if status_byte & STATUS_BYTE_MASK == 0 {
+impl Parser {
+    fn parse<'buf>(buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
+        let mut buf_iter = buf.iter();
+
+        match buf_iter.next().copied() {
+            None => {
                 Ok(MessageParseOutcome {
                     remaining_buf: buf_iter.as_slice(),
-                    status: MessageParseOutcomeStatus::UnexpectedDataByte,
+                    status: MessageParseOutcomeStatus::NeedMoreBytes(None),
                 })
-            } else {
-                let status_byte = StatusByte(status_byte);
-                todo!()
+            }
+            Some(status_byte) => {
+                const STATUS_BYTE_MASK: u8 = 0b10000000;
+                if status_byte & STATUS_BYTE_MASK == 0 {
+                    Ok(MessageParseOutcome {
+                        remaining_buf: buf_iter.as_slice(),
+                        status: MessageParseOutcomeStatus::UnexpectedDataByte,
+                    })
+                } else {
+                    let status_byte = StatusByte(status_byte);
+                    todo!()
+                }
             }
         }
     }
