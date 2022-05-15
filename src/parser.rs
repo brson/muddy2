@@ -20,11 +20,11 @@ pub enum MessageParseOutcomeStatus {
 }
 
 pub struct Parser {
-    running_status: Option<ChannelMessage>,
+    running_status_byte: Option<StatusByte>,
 }
 
 impl Parser {
-    fn parse<'buf>(buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
+    fn parse<'buf>(&mut self, buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
         let mut buf_iter = buf.iter();
 
         match buf_iter.next().copied() {
@@ -34,22 +34,25 @@ impl Parser {
                     status: MessageParseOutcomeStatus::NeedMoreBytes(None),
                 })
             }
-            Some(status_byte) => {
+            Some(first_byte) => {
                 const STATUS_BYTE_MASK: u8 = 0b10000000;
-                if status_byte & STATUS_BYTE_MASK == 0 {
+                if first_byte & STATUS_BYTE_MASK != 0 {
+                    let status_byte = StatusByte(first_byte);
+                    todo!()
+                } else if let Some(running_status_byte) = self.running_status_byte {
+                    todo!()
+                } else {
                     Ok(MessageParseOutcome {
                         remaining_buf: buf_iter.as_slice(),
                         status: MessageParseOutcomeStatus::UnexpectedDataByte,
                     })
-                } else {
-                    let status_byte = StatusByte(status_byte);
-                    todo!()
                 }
             }
         }
     }
 }
 
+#[derive(Copy, Clone)]
 struct StatusByte(u8);
 
 impl StatusByte {
