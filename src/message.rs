@@ -5,23 +5,26 @@ pub enum Message {
     System(SystemMessage),
 }
 
-pub enum ChannelMessage {
+pub struct ChannelMessage {
+    channel: MidiChannelId,
+    message: ChannelMessageType,
+}
+
+pub enum ChannelMessageType {
     ChannelVoice(ChannelVoiceMessage),
     ChannelMode(ChannelModeMessage),
+}
+
+pub struct ChannelVoiceMessage {
+}
+
+pub struct ChannelModeMessage {
 }
 
 pub enum SystemMessage {
     SystemCommon(SystemCommonMessage),
     SystemRealTime(SystemRealTimeMessage),
     SystemExclusive(SystemExclusiveMessage),
-}
-
-pub struct ChannelVoiceMessage {
-    channel: MidiChannelId,
-}
-
-pub struct ChannelModeMessage {
-    channel: MidiChannelId,
 }
 
 pub struct MidiChannelId(u8);

@@ -24,7 +24,7 @@ pub struct Parser {
 }
 
 impl Parser {
-    fn parse<'buf>(&mut self, buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
+    pub fn parse<'buf>(&mut self, buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
         let mut buf_iter = buf.iter();
 
         match buf_iter.next().copied() {
