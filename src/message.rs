@@ -15,7 +15,14 @@ pub enum ChannelMessageType {
     ChannelMode(ChannelModeMessage),
 }
 
-pub struct ChannelVoiceMessage {
+pub enum ChannelVoiceMessage {
+    NoteOff,
+    NoteOn,
+    PolyphonicKeyPressureOrAftertouch,
+    ControlChange,
+    ProgramChange,
+    ChannelPressureOrAftertouch,
+    PitchBendChange,
 }
 
 pub struct ChannelModeMessage {
