@@ -26,6 +26,12 @@ pub struct Parser {
 }
 
 impl Parser {
+    pub fn new() -> Parser {
+        Parser {
+            running_status_byte: None,
+        }
+    }
+
     pub fn parse(&mut self, buf: &[u8]) -> Result<MessageParseOutcome> {
         let mut buf_iter = buf.iter();
 
