@@ -184,10 +184,10 @@ impl StatusByte {
         match status_nibble {
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_OFF => get_data_bytes(buf, 2),
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_ON => get_data_bytes(buf, 2),
-            status_nibbles::CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_OR_AFTERTOUCH => get_data_bytes(buf, 2),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_AFTERTOUCH => get_data_bytes(buf, 2),
             status_nibbles::CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE => get_data_bytes(buf, 2),
             status_nibbles::CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE => get_data_bytes(buf, 1),
-            status_nibbles::CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_OR_AFTERTOUCH => get_data_bytes(buf, 1),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_AFTERTOUCH => get_data_bytes(buf, 1),
             status_nibbles::CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE => get_data_bytes(buf, 2),
             status_nibbles::SYSTEM_MESSAGE => {
                 todo!()
@@ -224,10 +224,10 @@ enum DataBytes<'buf> {
 mod status_nibbles {
     pub const CHANNEL_VOICE_MESSAGE_NOTE_OFF: u8 = 0b1000;
     pub const CHANNEL_VOICE_MESSAGE_NOTE_ON: u8 = 0b1001;
-    pub const CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_OR_AFTERTOUCH: u8 = 0b1010;
+    pub const CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_AFTERTOUCH: u8 = 0b1010;
     pub const CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE: u8 = 0b1011;
     pub const CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE: u8 = 0b1100;
-    pub const CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_OR_AFTERTOUCH: u8 = 0b1101;
+    pub const CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_AFTERTOUCH: u8 = 0b1101;
     pub const CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE: u8 = 0b1110;
     pub const SYSTEM_MESSAGE: u8 = 0b1111;
 }
