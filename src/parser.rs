@@ -2,6 +2,7 @@ use anyhow::Result;
 use crate::message::*;
 
 pub struct MessageParseOutcome {
+    /// Caller should shift buffer by this number of bytes.
     bytes_consumed: u8,
     status: MessageParseOutcomeStatus,
 }
@@ -17,6 +18,7 @@ pub enum MessageParseOutcomeStatus {
         byte_index: usize,
     },
     UnexpectedDataByte,
+    BrokenMessage(Vec<u8>),
 }
 
 pub struct Parser {
@@ -36,12 +38,29 @@ impl Parser {
             }
             Some(first_byte) => {
                 const STATUS_BYTE_MASK: u8 = 0b10000000;
-                if first_byte & STATUS_BYTE_MASK != 0 {
+                let first_byte_is_status_byte = first_byte & STATUS_BYTE_MASK != 0;
+                if first_byte_is_status_byte {
+                    let remaining_bytes = buf_iter.as_slice();
                     let status_byte = StatusByte(first_byte);
-                    let outcome = status_byte.parse(buf_iter.as_slice())?;
+                    let outcome = status_byte.parse(remaining_bytes)?;
+                    assert!(outcome.bytes_consumed as usize <= remaining_bytes.len());
                     match outcome.status {
                         MessageParseOutcomeStatus::Message(Message::Channel(_)) => {
                             self.running_status_byte = Some(status_byte);
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
+                        },
+                        MessageParseOutcomeStatus::Message(Message::System(SystemMessage::SystemRealTime(_))) => {
+                            self.running_status_byte = self.running_status_byte;
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
+                        },
+                        MessageParseOutcomeStatus::Message(Message::System(_)) => {
+                            self.running_status_byte = None;
                             Ok(MessageParseOutcome {
                                 bytes_consumed: 1 + outcome.bytes_consumed,
                                 status: outcome.status,
@@ -51,12 +70,71 @@ impl Parser {
                             assert_eq!(0, outcome.bytes_consumed);
                             Ok(outcome)
                         },
-                        _ => {
-                            todo!()
+                        MessageParseOutcomeStatus::InterruptingSystemRealTimeMessage {
+                            message, byte_index,
+                        } => {
+                            assert_eq!(0, outcome.bytes_consumed);
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 0,
+                                status: MessageParseOutcomeStatus::InterruptingSystemRealTimeMessage {
+                                    message,
+                                    byte_index: 1 + byte_index,
+                                }
+                            })
+                        },
+                        MessageParseOutcomeStatus::UnexpectedDataByte => {
+                            unreachable!()
+                        },
+                        MessageParseOutcomeStatus::BrokenMessage(_) => {
+                            // todo think harder about this case
+                            self.running_status_byte = self.running_status_byte;
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
                         }
                     }
                 } else if let Some(running_status_byte) = self.running_status_byte {
-                    todo!()
+                    let remaining_bytes = buf;
+                    let status_byte = running_status_byte;
+                    let outcome = status_byte.parse(remaining_bytes)?;
+                    assert!(outcome.bytes_consumed as usize <= remaining_bytes.len());
+                    match outcome.status {
+                        MessageParseOutcomeStatus::Message(Message::Channel(_)) => {
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
+                        },
+                        MessageParseOutcomeStatus::Message(_) => {
+                            unreachable!()
+                        },
+                        MessageParseOutcomeStatus::NeedMoreBytes(_) => {
+                            assert_eq!(0, outcome.bytes_consumed);
+                            Ok(outcome)
+                        },
+                        MessageParseOutcomeStatus::InterruptingSystemRealTimeMessage {
+                            message, byte_index,
+                        } => {
+                            assert_eq!(0, outcome.bytes_consumed);
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 0,
+                                status: MessageParseOutcomeStatus::InterruptingSystemRealTimeMessage {
+                                    message,
+                                    byte_index: byte_index,
+                                }
+                            })
+                        },
+                        MessageParseOutcomeStatus::UnexpectedDataByte => {
+                            unreachable!()
+                        },
+                        MessageParseOutcomeStatus::BrokenMessage(_) => {
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
+                        }
+                    }
                 } else {
                     Ok(MessageParseOutcome {
                         bytes_consumed: 1,
