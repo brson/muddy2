@@ -163,6 +163,9 @@ impl StatusByte {
                     status: MessageParseOutcomeStatus::NeedMoreBytes(more),
                 })
             }
+            DataBytes::InterruptingStatusByte { index } => {
+                todo!()
+            }
         }
     }
 
@@ -192,7 +195,10 @@ fn get_data_bytes(buf: &[u8], num: usize) -> DataBytes {
 
 enum DataBytes<'buf> {
     Bytes(&'buf [u8]),
-    NeedMore(Option<u8>)
+    NeedMore(Option<u8>),
+    InterruptingStatusByte {
+        index: usize,
+    }
 }
 
 mod status_nibbles {
