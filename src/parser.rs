@@ -42,7 +42,10 @@ impl Parser {
                     match outcome.status {
                         MessageParseOutcomeStatus::Message(Message::Channel(_)) => {
                             self.running_status_byte = Some(status_byte);
-                            todo!()
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
                         },
                         _ => {
                             todo!()
