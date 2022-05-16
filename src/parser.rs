@@ -47,6 +47,10 @@ impl Parser {
                                 status: outcome.status,
                             })
                         },
+                        MessageParseOutcomeStatus::NeedMoreBytes(_) => {
+                            assert_eq!(0, outcome.bytes_consumed);
+                            Ok(outcome)
+                        },
                         _ => {
                             todo!()
                         }
