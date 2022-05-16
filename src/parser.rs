@@ -166,9 +166,28 @@ impl StatusByte {
         }
     }
 
-    fn data_bytes(&self, buf: &[u8]) -> DataBytes {
-        todo!()
+    fn data_bytes<'buf>(&self, buf: &'buf [u8]) -> DataBytes<'buf> {
+        let status_nibble = self.0 >> 4;
+        match status_nibble {
+            status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_OFF => get_data_bytes(buf, 2),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_ON => get_data_bytes(buf, 2),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_OR_AFTERTOUCH => get_data_bytes(buf, 2),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE => get_data_bytes(buf, 2),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE => get_data_bytes(buf, 1),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_OR_AFTERTOUCH => get_data_bytes(buf, 1),
+            status_nibbles::CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE => get_data_bytes(buf, 2),
+            status_nibbles::SYSTEM_MESSAGE => {
+                todo!()
+            },
+            _ => {
+                unreachable!()
+            }
+        }
     }
+}
+
+fn get_data_bytes(buf: &[u8], num: usize) -> DataBytes {
+    todo!()
 }
 
 enum DataBytes<'buf> {
@@ -177,14 +196,14 @@ enum DataBytes<'buf> {
 }
 
 mod status_nibbles {
-    const CHANNEL_VOICE_MESSAGE_NOTE_OFF: u8 = 0b1000;
-    const CHANNEL_VOICE_MESSAGE_NOTE_ON: u8 = 0b1001;
-    const CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_OR_AFTERTOUCH: u8 = 0b1010;
-    const CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE: u8 = 0b1011;
-    const CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE: u8 = 0b1100;
-    const CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_OR_AFTERTOUCH: u8 = 0b1101;
-    const CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE: u8 = 0b1110;
-    const SYSTEM_MESSAGE: u8 = 0b1111;
+    pub const CHANNEL_VOICE_MESSAGE_NOTE_OFF: u8 = 0b1000;
+    pub const CHANNEL_VOICE_MESSAGE_NOTE_ON: u8 = 0b1001;
+    pub const CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_OR_AFTERTOUCH: u8 = 0b1010;
+    pub const CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE: u8 = 0b1011;
+    pub const CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE: u8 = 0b1100;
+    pub const CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_OR_AFTERTOUCH: u8 = 0b1101;
+    pub const CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE: u8 = 0b1110;
+    pub const SYSTEM_MESSAGE: u8 = 0b1111;
 }
 
 
