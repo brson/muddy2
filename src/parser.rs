@@ -9,7 +9,7 @@ pub struct MessageParseOutcome {
 
 pub enum MessageParseOutcomeStatus {
     Message(Message),
-    NeedMoreBytes(Option<u8>),
+    NeedMoreBytes(Option<usize>),
     /// A real time message was encountered while parsing another message.
     /// This returns the message, along with the byte that contained it.
     /// The caller should remove the byte from the stream and retry.
@@ -43,8 +43,7 @@ impl Parser {
                 })
             }
             Some(first_byte) => {
-                const STATUS_BYTE_MASK: u8 = 0b10000000;
-                let first_byte_is_status_byte = first_byte & STATUS_BYTE_MASK != 0;
+                let first_byte_is_status_byte = is_status_byte(first_byte);
                 if first_byte_is_status_byte {
                     let remaining_bytes = buf_iter.as_slice();
                     let status_byte = StatusByte(first_byte);
@@ -152,6 +151,11 @@ impl Parser {
     }
 }
 
+fn is_status_byte(byte: u8) -> bool {
+    const STATUS_BYTE_MASK: u8 = 0b10000000;
+    byte & STATUS_BYTE_MASK != 0
+}
+
 #[derive(Copy, Clone)]
 struct StatusByte(u8);
 
@@ -196,12 +200,22 @@ impl StatusByte {
 }
 
 fn get_data_bytes(buf: &[u8], num: usize) -> DataBytes {
-    todo!()
+    if let Some(needed) = num.checked_sub(buf.len()) {
+        DataBytes::NeedMore(Some(needed))
+    } else {
+        let bytes = &buf[0..num];
+        for (index, byte) in bytes.iter().enumerate() {
+            if is_status_byte(*byte) {
+                return DataBytes::InterruptingStatusByte { index };
+            }
+        }
+        DataBytes::Bytes(bytes)
+    }
 }
 
 enum DataBytes<'buf> {
     Bytes(&'buf [u8]),
-    NeedMore(Option<u8>),
+    NeedMore(Option<usize>),
     InterruptingStatusByte {
         index: usize,
     }
