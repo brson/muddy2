@@ -152,19 +152,38 @@ struct StatusByte(u8);
 impl StatusByte {
     pub fn parse(&self, buf: &[u8]) -> Result<MessageParseOutcome> {
         let status_nibble = self.0 >> 4;
+        let data_bytes = self.data_bytes(buf);
+        match data_bytes {
+            DataBytes::Bytes(bytes) => {
+                todo!()
+            }
+            DataBytes::NeedMore(more) => {
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::NeedMoreBytes(more),
+                })
+            }
+        }
+    }
+
+    fn data_bytes(&self, buf: &[u8]) -> DataBytes {
         todo!()
     }
+}
+
+enum DataBytes<'buf> {
+    Bytes(&'buf [u8]),
+    NeedMore(Option<u8>)
 }
 
 mod status_nibbles {
     const CHANNEL_VOICE_MESSAGE_NOTE_OFF: u8 = 0b1000;
     const CHANNEL_VOICE_MESSAGE_NOTE_ON: u8 = 0b1001;
     const CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_OR_AFTERTOUCH: u8 = 0b1010;
-    const CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE: u8 = 0b1011;
+    const CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE: u8 = 0b1011;
     const CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE: u8 = 0b1100;
     const CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_OR_AFTERTOUCH: u8 = 0b1101;
     const CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE: u8 = 0b1110;
-    const CHANNEL_MODE_MESSAGE_SELECT: u8 = 0b1011;
     const SYSTEM_MESSAGE: u8 = 0b1111;
 }
 
