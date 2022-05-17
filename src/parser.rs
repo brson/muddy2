@@ -165,7 +165,7 @@ impl StatusByte {
         let data_bytes = self.data_bytes(buf);
         match data_bytes {
             DataBytes::Bytes(bytes) => {
-                todo!()
+                self.parse_exact_number_of_bytes(bytes)
             }
             DataBytes::NeedMore(more) => {
                 Ok(MessageParseOutcome {
@@ -189,6 +189,39 @@ impl StatusByte {
             status_nibbles::CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE => get_data_bytes(buf, 1),
             status_nibbles::CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_AFTERTOUCH => get_data_bytes(buf, 1),
             status_nibbles::CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE => get_data_bytes(buf, 2),
+            status_nibbles::SYSTEM_MESSAGE => {
+                todo!()
+            },
+            _ => {
+                unreachable!()
+            }
+        }
+    }
+
+    fn parse_exact_number_of_bytes(&self, bytes: &[u8]) -> Result<MessageParseOutcome> {
+        let status_nibble = self.0 >> 4;
+        match status_nibble {
+            status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_OFF => {
+                todo!()
+            }
+            status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_ON => {
+                todo!()
+            }
+            status_nibbles::CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_AFTERTOUCH => {
+                todo!()
+            }
+            status_nibbles::CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE => {
+                todo!()
+            }
+            status_nibbles::CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE => {
+                todo!()
+            }
+            status_nibbles::CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_AFTERTOUCH => {
+                todo!()
+            }
+            status_nibbles::CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE => {
+                todo!()
+            }
             status_nibbles::SYSTEM_MESSAGE => {
                 todo!()
             },
