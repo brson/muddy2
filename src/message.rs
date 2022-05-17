@@ -6,8 +6,8 @@ pub enum Message {
 }
 
 pub struct ChannelMessage {
-    channel: MidiChannelId,
-    message: ChannelMessageType,
+    pub channel: MidiChannelId,
+    pub message: ChannelMessageType,
 }
 
 pub enum ChannelMessageType {

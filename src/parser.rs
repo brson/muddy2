@@ -1,5 +1,6 @@
 use anyhow::Result;
 use crate::message::*;
+use crate::assert_from::AssertFrom;        
 
 pub struct MessageParseOutcome {
     /// Caller should shift buffer by this number of bytes.
@@ -203,7 +204,20 @@ impl StatusByte {
         let status_nibble = self.0 >> 4;
         match status_nibble {
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_OFF => {
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 2,
+                    status: MessageParseOutcomeStatus::Message (
+                        Message::Channel(ChannelMessage {
+                            channel: todo!(),
+                            message: ChannelMessageType::ChannelVoice(
+                                ChannelVoiceMessage::NoteOff(cvm::NoteOff {
+                                    note_number: cvm::NoteNumber(cvm::Unsigned7::assert_from(bytes[0])),
+                                    velocity: cvm::KeyVelocity(cvm::Unsigned7::assert_from(bytes[1])),
+                                })
+                            )
+                        })
+                    )
+                })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_ON => {
                 todo!()
