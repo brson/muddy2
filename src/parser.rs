@@ -256,7 +256,26 @@ impl StatusByte {
                 })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE => {
-                todo!()
+                assert_eq!(bytes.len(), 2);
+                let is_mode_message = bytes[0] >= 120 && bytes[0] <= 127;
+                if !is_mode_message {
+                    Ok(MessageParseOutcome {
+                        bytes_consumed: 1,
+                        status: MessageParseOutcomeStatus::Message (
+                            Message::Channel(ChannelMessage {
+                                channel,
+                                message: ChannelMessageType::ChannelVoice(
+                                    ChannelVoiceMessage::ControlChange(cvm::ControlChange {
+                                        control_number: cvm::ControlNumber(cvm::Unsigned7::assert_from(bytes[0])),
+                                        value: cvm::Unsigned7::assert_from(bytes[1]),
+                                    })
+                                )
+                            })
+                        )
+                    })
+                } else {
+                    todo!()
+                }
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE => {
                 assert_eq!(bytes.len(), 1);
