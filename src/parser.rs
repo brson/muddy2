@@ -205,6 +205,7 @@ impl StatusByte {
         let channel = MidiChannelId::assert_from(self.0 & 0b1111);
         match status_nibble {
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_OFF => {
+                assert_eq!(bytes.len(), 2);
                 Ok(MessageParseOutcome {
                     bytes_consumed: 2,
                     status: MessageParseOutcomeStatus::Message (
@@ -221,6 +222,7 @@ impl StatusByte {
                 })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_ON => {
+                assert_eq!(bytes.len(), 2);
                 Ok(MessageParseOutcome {
                     bytes_consumed: 2,
                     status: MessageParseOutcomeStatus::Message (
@@ -237,16 +239,56 @@ impl StatusByte {
                 })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_AFTERTOUCH => {
-                todo!()
+                assert_eq!(bytes.len(), 2);
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 2,
+                    status: MessageParseOutcomeStatus::Message (
+                        Message::Channel(ChannelMessage {
+                            channel,
+                            message: ChannelMessageType::ChannelVoice(
+                                ChannelVoiceMessage::PolyphonicKeyPressureAftertouch(cvm::PolyphonicKeyPressureAftertouch {
+                                    note_number: cvm::NoteNumber(cvm::Unsigned7::assert_from(bytes[0])),
+                                    value: cvm::Unsigned7::assert_from(bytes[1]),
+                                })
+                            )
+                        })
+                    )
+                })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_CONTROL_CHANGE_OR_CHANNEL_MODE_MESSAGE => {
                 todo!()
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE => {
-                todo!()
+                assert_eq!(bytes.len(), 1);
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 1,
+                    status: MessageParseOutcomeStatus::Message (
+                        Message::Channel(ChannelMessage {
+                            channel,
+                            message: ChannelMessageType::ChannelVoice(
+                                ChannelVoiceMessage::ProgramChange(cvm::ProgramChange {
+                                    program_number: cvm::ProgramNumber(cvm::Unsigned7::assert_from(bytes[0])),
+                                })
+                            )
+                        })
+                    )
+                })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_AFTERTOUCH => {
-                todo!()
+                assert_eq!(bytes.len(), 1);
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 1,
+                    status: MessageParseOutcomeStatus::Message (
+                        Message::Channel(ChannelMessage {
+                            channel,
+                            message: ChannelMessageType::ChannelVoice(
+                                ChannelVoiceMessage::ChannelPressureAftertouch(cvm::ChannelPressureAftertouch {
+                                    value: cvm::Unsigned7::assert_from(bytes[0]),
+                                })
+                            )
+                        })
+                    )
+                })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE => {
                 todo!()
