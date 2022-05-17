@@ -221,7 +221,20 @@ impl StatusByte {
                 })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_ON => {
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 2,
+                    status: MessageParseOutcomeStatus::Message (
+                        Message::Channel(ChannelMessage {
+                            channel,
+                            message: ChannelMessageType::ChannelVoice(
+                                ChannelVoiceMessage::NoteOn(cvm::NoteOn {
+                                    note_number: cvm::NoteNumber(cvm::Unsigned7::assert_from(bytes[0])),
+                                    velocity: cvm::KeyVelocity(cvm::Unsigned7::assert_from(bytes[1])),
+                                })
+                            )
+                        })
+                    )
+                })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_POLYPHONIC_KEY_PRESSURE_AFTERTOUCH => {
                 todo!()
