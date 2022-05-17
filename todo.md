@@ -8,3 +8,5 @@
   - [ ] parse system common messages
   - [ ] parse system real time messages
 - [ ] table II
+- [ ] table III
+  - [ ] transcribe control numbers
