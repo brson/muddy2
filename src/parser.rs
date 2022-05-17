@@ -202,13 +202,14 @@ impl StatusByte {
     fn parse_exact_number_of_bytes(&self, bytes: &[u8]) -> Result<MessageParseOutcome> {
         for byte in bytes { assert!(!is_status_byte(*byte)) }
         let status_nibble = self.0 >> 4;
+        let channel = MidiChannelId::assert_from(self.0 & 0b1111);
         match status_nibble {
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_OFF => {
                 Ok(MessageParseOutcome {
                     bytes_consumed: 2,
                     status: MessageParseOutcomeStatus::Message (
                         Message::Channel(ChannelMessage {
-                            channel: todo!(),
+                            channel,
                             message: ChannelMessageType::ChannelVoice(
                                 ChannelVoiceMessage::NoteOff(cvm::NoteOff {
                                     note_number: cvm::NoteNumber(cvm::Unsigned7::assert_from(bytes[0])),
