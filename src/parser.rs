@@ -199,6 +199,7 @@ impl StatusByte {
     }
 
     fn parse_exact_number_of_bytes(&self, bytes: &[u8]) -> Result<MessageParseOutcome> {
+        for byte in bytes { assert!(!is_status_byte(*byte)) }
         let status_nibble = self.0 >> 4;
         match status_nibble {
             status_nibbles::CHANNEL_VOICE_MESSAGE_NOTE_OFF => {
