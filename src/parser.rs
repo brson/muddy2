@@ -325,16 +325,18 @@ impl StatusByte {
 
 fn get_data_bytes(buf: &[u8], num: usize) -> DataBytes {
     if let Some(needed) = num.checked_sub(buf.len()) {
-        DataBytes::NeedMore(Some(needed))
-    } else {
-        let bytes = &buf[0..num];
-        for (index, byte) in bytes.iter().enumerate() {
-            if is_status_byte(*byte) {
-                return DataBytes::InterruptingStatusByte { index };
-            }
+        if needed > 0 {
+            return DataBytes::NeedMore(Some(needed));
         }
-        DataBytes::Bytes(bytes)
     }
+
+    let bytes = &buf[0..num];
+    for (index, byte) in bytes.iter().enumerate() {
+        if is_status_byte(*byte) {
+            return DataBytes::InterruptingStatusByte { index };
+        }
+    }
+    DataBytes::Bytes(bytes)
 }
 
 enum DataBytes<'buf> {
