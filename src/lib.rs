@@ -2,5 +2,5 @@
 
 mod assert_from;
 mod control_number;
-mod message;
-mod parser;
+pub mod message;
+pub mod parser;

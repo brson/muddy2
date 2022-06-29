@@ -4,10 +4,11 @@ use crate::assert_from::AssertFrom;
 
 pub struct MessageParseOutcome {
     /// Caller should shift buffer by this number of bytes.
-    bytes_consumed: u8,
-    status: MessageParseOutcomeStatus,
+    pub bytes_consumed: u8,
+    pub status: MessageParseOutcomeStatus,
 }
 
+#[derive(Debug)]
 pub enum MessageParseOutcomeStatus {
     Message(Message),
     NeedMoreBytes(Option<usize>),
