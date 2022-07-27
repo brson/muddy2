@@ -44,6 +44,12 @@ pub mod u7 {
             }
         }
     }
+
+    impl From<Unsigned7> for u8 {
+        fn from(other: Unsigned7) -> u8 {
+            other.0
+        }
+    }
 }
 
 pub mod cvm {
