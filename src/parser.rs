@@ -371,6 +371,7 @@ enum DataBytes<'buf> {
     }
 }
 
+/// Reference: MIDI spec table I
 mod status_nibbles {
     pub const CHANNEL_VOICE_MESSAGE_NOTE_OFF: u8 = 0b1000;
     pub const CHANNEL_VOICE_MESSAGE_NOTE_ON: u8 = 0b1001;
@@ -382,4 +383,22 @@ mod status_nibbles {
     pub const SYSTEM_MESSAGE: u8 = 0b1111;
 }
 
-
+/// Reference: MIDI spec tables V, VI, VII
+mod system_status_bytes {
+    pub const SYSTEM_EXCLUSIVE: u8 = 0xF0;
+    pub const SYSTEM_COMMON_MIDI_TIME_QUARTER_FRAME: u8 = 0xF1;
+    pub const SYSTEM_COMMON_SONG_POSITION_POINTER: u8 = 0xF2;
+    pub const SYSTEM_COMMON_SONG_SELECT: u8 = 0xF3;
+    pub const SYSTEM_COMMON_UNDEFINED_1: u8 = 0xF4;
+    pub const SYSTEM_COMMON_UNDEFINED_2: u8 = 0xF5;
+    pub const SYSTEM_COMMON_TUNE_REQUEST: u8 = 0xF6;
+    pub const SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG: u8 = 0xF7;
+    pub const SYSTEM_REALTIME_TIMING_CLOCK: u8 = 0xF8;
+    pub const SYSTEM_REALTIME_UNDEFINED_1: u8 = 0xF9;
+    pub const SYSTEM_REALTIME_START: u8 = 0xFA;
+    pub const SYSTEM_REALTIME_CONTINUE: u8 = 0xFB;
+    pub const SYSTEM_REALTIME_STOP: u8 = 0xFC;
+    pub const SYSTEM_REALTIME_UNDEFINED_2: u8 = 0xFD;
+    pub const SYSTEM_REALTIME_ACTIVE_SENSING: u8 = 0xFE;
+    pub const SYSTEM_REALTIME_SYSTEM_RESET: u8 = 0xFF;
+}

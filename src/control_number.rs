@@ -1,3 +1,5 @@
+//! Reference: MIDI spec table III
+
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 #[derive(IntoPrimitive, TryFromPrimitive)]

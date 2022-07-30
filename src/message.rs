@@ -139,6 +139,8 @@ pub mod cvm {
     }
 }
 
+// FIXME some of these carry data
+/// Referenc: MIDI spec table IV
 #[derive(Debug)]
 #[derive(IntoPrimitive, TryFromPrimitive)]
 #[repr(u8)]
