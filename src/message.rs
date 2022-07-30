@@ -30,18 +30,6 @@ pub enum ChannelVoiceMessage {
     PitchBendChange(cvm::PitchBendChange),
 }
 
-impl ChannelVoiceMessage {
-    /// Returns if the note should turn off.
-    ///
-    /// Taking into account that NoteOn with velocity 0 means NoteOff.
-    ///
-    /// Returns `Some` if the note should be turned off,
-    /// and the inner value is the off velocity.
-    fn is_note_off_equiv(&self) -> Option<cvm::KeyVelocity> {
-        todo!()
-    }
-}
-
 pub mod u7 {
     #[derive(Debug)]
     #[derive(Copy, Clone)]
@@ -142,12 +130,6 @@ pub mod cvm {
     #[derive(Debug)]
     pub struct PitchBendChange {
         pub value: Unsigned14,
-    }
-
-    impl PitchBendChange {
-        pub fn is_centered(&self) -> bool {
-            u16::from(self.value) == 0x2000
-        }
     }
 }
 
