@@ -186,6 +186,8 @@ impl StatusByte {
                 })
             }
             DataBytes::InterruptingStatusByte { index } => {
+                /// case: system realtime messages
+                /// case: broken messages
                 todo!()
             }
         }
