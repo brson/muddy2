@@ -30,6 +30,15 @@ pub enum ChannelVoiceMessage {
     PitchBendChange(cvm::PitchBendChange),
 }
 
+impl ChannelVoiceMessage {
+    /// Returns if the note should turn off.
+    ///
+    /// Taking into account that NoteOn with velocity 0 means NoteOff.
+    fn is_note_off_equiv(&self) -> bool {
+        todo!()
+    }
+}
+
 pub mod u7 {
     #[derive(Debug)]
     #[derive(Copy, Clone)]
