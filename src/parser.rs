@@ -112,7 +112,11 @@ impl Parser {
                             })
                         },
                         MessageParseOutcomeStatus::WaitForStatusByte => {
-                            todo!()
+                            assert_eq!(0, outcome.bytes_consumed);
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 0,
+                                status: MessageParseOutcomeStatus::WaitForStatusByte,
+                            })
                         },
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
