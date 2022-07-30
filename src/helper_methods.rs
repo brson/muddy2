@@ -9,12 +9,15 @@ impl message::ChannelVoiceMessage {
     ///
     /// Returns `Some` if the note should be turned off,
     /// and the inner value is the off velocity.
+    ///
+    /// Reference: todo
     pub fn is_note_off_equiv(&self) -> Option<cvm::KeyVelocity> {
         todo!()
     }
 }
 
 impl cvm::PitchBendChange {
+    /// Reference: todo
     pub fn is_centered(&self) -> bool {
         u16::from(self.value) == 0x2000
     }
