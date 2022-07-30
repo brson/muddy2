@@ -261,7 +261,7 @@ impl StatusByte {
                 let is_mode_message = bytes[0] >= 120 && bytes[0] <= 127;
                 if !is_mode_message {
                     Ok(MessageParseOutcome {
-                        bytes_consumed: 1,
+                        bytes_consumed: 2,
                         status: MessageParseOutcomeStatus::Message (
                             Message::Channel(ChannelMessage {
                                 channel,
@@ -275,7 +275,17 @@ impl StatusByte {
                         )
                     })
                 } else {
-                    todo!()
+                    Ok(MessageParseOutcome {
+                        bytes_consumed: 2,
+                        status: MessageParseOutcomeStatus::Message (
+                            Message::Channel(ChannelMessage {
+                                channel,
+                                message: ChannelMessageType::ChannelMode(
+                                    ChannelModeMessage::try_from(bytes[0]).unwrap(),
+                                )
+                            })
+                        )
+                    })
                 }
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_PROGRAM_CHANGE => {

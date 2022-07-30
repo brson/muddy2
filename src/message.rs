@@ -1,3 +1,4 @@
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 use anyhow::{Result, anyhow};
 
 #[derive(Debug)]
@@ -139,7 +140,17 @@ pub mod cvm {
 }
 
 #[derive(Debug)]
-pub struct ChannelModeMessage {
+#[derive(IntoPrimitive, TryFromPrimitive)]
+#[repr(u8)]
+pub enum ChannelModeMessage {
+    AllSoundOff = 120,
+    ResetAllControllers = 121,
+    LocalControl = 122,
+    AllNotesOff = 123,
+    OmniOff = 124,
+    OmniOn = 125,
+    MonoOn = 126,
+    PolyOn = 127,
 }
 
 #[derive(Debug)]
