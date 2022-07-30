@@ -192,7 +192,29 @@ impl StatusByte {
             status_nibbles::CHANNEL_VOICE_MESSAGE_CHANNEL_PRESSURE_AFTERTOUCH => get_data_bytes(buf, 1),
             status_nibbles::CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE => get_data_bytes(buf, 2),
             status_nibbles::SYSTEM_MESSAGE => {
-                todo!()
+                match self.0 {
+                    system_status_bytes::SYSTEM_COMMON_MIDI_TIME_QUARTER_FRAME => get_data_bytes(buf, 1),
+                    system_status_bytes::SYSTEM_COMMON_SONG_POSITION_POINTER => get_data_bytes(buf, 2),
+                    system_status_bytes::SYSTEM_COMMON_SONG_SELECT => get_data_bytes(buf, 1),
+                    system_status_bytes::SYSTEM_COMMON_UNDEFINED_1 => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_COMMON_UNDEFINED_2 => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_COMMON_TUNE_REQUEST => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_TIMING_CLOCK => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_UNDEFINED_1 => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_START => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_CONTINUE => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_STOP => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_UNDEFINED_2 => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_ACTIVE_SENSING => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_REALTIME_SYSTEM_RESET => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG => get_data_bytes(buf, 0),
+                    system_status_bytes::SYSTEM_EXCLUSIVE => {
+                        todo!()
+                    }
+                    _ => {
+                        unreachable!()
+                    }
+                }                    
             },
             _ => {
                 unreachable!()
