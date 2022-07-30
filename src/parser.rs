@@ -15,12 +15,22 @@ pub enum MessageParseOutcomeStatus {
     /// A real time message was encountered while parsing another message.
     /// This returns the message, along with the byte that contained it.
     /// The caller should remove the byte from the stream and retry.
+    ///
+    /// [`MessageParseOutcome::bytes_consumed`] will be 0.
     InterruptingSystemRealTimeMessage {
         message: SystemRealTimeMessage,
         byte_index: usize,
     },
+    /// A non-status byte was encountered while looking for a status byte.
+    ///
+    /// The unexpected byte is accounted for by [`MessageParseOutcome::bytes_consumed`].
     UnexpectedDataByte,
-    BrokenMessage(Vec<u8>),
+    /// A status byte was encountered while parsing a message.
+    ///
+    /// The broken message bytes are accounted for by [`MessageParseOutcome::bytes_consumed`].
+    ///
+    /// TODO this is unused
+    BrokenMessage,
 }
 
 pub struct Parser {
@@ -92,7 +102,7 @@ impl Parser {
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
                         },
-                        MessageParseOutcomeStatus::BrokenMessage(_) => {
+                        MessageParseOutcomeStatus::BrokenMessage => {
                             // todo think harder about this case
                             self.running_status_byte = self.running_status_byte;
                             Ok(MessageParseOutcome {
@@ -135,7 +145,7 @@ impl Parser {
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
                         },
-                        MessageParseOutcomeStatus::BrokenMessage(_) => {
+                        MessageParseOutcomeStatus::BrokenMessage => {
                             Ok(MessageParseOutcome {
                                 bytes_consumed: outcome.bytes_consumed,
                                 status: outcome.status,
