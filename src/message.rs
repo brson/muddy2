@@ -31,6 +31,7 @@ pub enum ChannelVoiceMessage {
 
 pub mod u7 {
     #[derive(Debug)]
+    #[derive(Copy, Clone)]
     pub struct Unsigned7(u8);
 
     impl TryFrom<u8> for Unsigned7 {
@@ -52,8 +53,35 @@ pub mod u7 {
     }
 }
 
+pub mod u14 {
+    #[derive(Debug)]
+    #[derive(Copy, Clone)]
+    pub struct Unsigned14(u16);
+
+    impl TryFrom<[u8; 2]> for Unsigned14 {
+        type Error = anyhow::Error;
+
+        fn try_from(value: [u8; 2]) -> anyhow::Result<Unsigned14> {
+            if value[0] <= 127 && value[1] <= 127 {
+                let value = (value[1] as u16) << 7 | (value[0] as u16);
+                Ok(Unsigned14(value))
+            } else {
+                Err(anyhow::anyhow!("out of range"))
+            }
+        }
+    }
+
+    impl From<Unsigned14> for u16 {
+        fn from(other: Unsigned14) -> u16 {
+            other.0
+        }
+    }
+}
+
+/// Channel voice messages.
 pub mod cvm {
     pub use super::u7::Unsigned7;
+    pub use super::u14::Unsigned14;
 
     #[derive(Debug)]
     pub struct NoteNumber(pub Unsigned7);
@@ -100,6 +128,13 @@ pub mod cvm {
 
     #[derive(Debug)]
     pub struct PitchBendChange {
+        pub value: Unsigned14,
+    }
+
+    impl PitchBendChange {
+        pub fn is_centered(&self) -> bool {
+            u16::from(self.value) == 0x2000
+        }
     }
 }
 
