@@ -219,7 +219,7 @@ impl StatusByte {
                     system_status_bytes::SYSTEM_REALTIME_SYSTEM_RESET => get_data_bytes(buf, 0),
                     system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG => get_data_bytes(buf, 0),
                     system_status_bytes::SYSTEM_EXCLUSIVE => {
-                        todo!()
+                        get_sysex_bytes(buf)
                     }
                     _ => {
                         unreachable!()
@@ -393,6 +393,10 @@ fn get_data_bytes(buf: &[u8], num: usize) -> DataBytes {
         }
     }
     DataBytes::Bytes(bytes)
+}
+
+fn get_sysex_bytes(buf: &[u8]) -> DataBytes {
+    todo!()
 }
 
 enum DataBytes<'buf> {
