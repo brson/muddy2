@@ -34,7 +34,10 @@ impl ChannelVoiceMessage {
     /// Returns if the note should turn off.
     ///
     /// Taking into account that NoteOn with velocity 0 means NoteOff.
-    fn is_note_off_equiv(&self) -> bool {
+    ///
+    /// Returns `Some` if the note should be turned off,
+    /// and the inner value is the off velocity.
+    fn is_note_off_equiv(&self) -> Option<cvm::KeyVelocity> {
         todo!()
     }
 }
