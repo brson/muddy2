@@ -1,3 +1,6 @@
+// FIXME: A sysex message that is repeatedly interrupted by
+// system realtime messages will cause exponential parsing behavior.
+
 use anyhow::Result;
 use crate::message::*;
 use crate::assert_from::AssertFrom;        
@@ -21,6 +24,15 @@ pub enum MessageParseOutcomeStatus {
         message: SystemRealTimeMessage,
         byte_index: usize,
     },
+    /// We are processing an arbitrary-sized sysex message and need to wait
+    /// until we have a see a status byte before we can do anything useful.
+    ///
+    /// The caller _can_ continue loading data and calling [`Parser::parse`],
+    /// but it is more efficient if the caller scans for a byte that passes
+    /// [`is_status_byte`] before trying to parse again.
+    ///
+    /// [`MessageParseOutcome::bytes_consumed`] will be 0.
+    WaitForStatusByte,
     /// A non-status byte was encountered while looking for a status byte.
     ///
     /// The unexpected byte is accounted for by [`MessageParseOutcome::bytes_consumed`].
@@ -99,6 +111,9 @@ impl Parser {
                                 }
                             })
                         },
+                        MessageParseOutcomeStatus::WaitForStatusByte => {
+                            todo!()
+                        },
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
                         },
@@ -141,6 +156,9 @@ impl Parser {
                                     byte_index: byte_index,
                                 }
                             })
+                        },
+                        MessageParseOutcomeStatus::WaitForStatusByte => {
+                            unreachable!()
                         },
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
