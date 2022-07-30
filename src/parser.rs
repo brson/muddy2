@@ -311,7 +311,21 @@ impl StatusByte {
                 })
             }
             status_nibbles::CHANNEL_VOICE_MESSAGE_PITCH_BEND_CHANGE => {
-                todo!()
+                assert_eq!(bytes.len(), 2);
+                let bytes = <[u8; 2]>::try_from(bytes).unwrap();
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 2,
+                    status: MessageParseOutcomeStatus::Message (
+                        Message::Channel(ChannelMessage {
+                            channel,
+                            message: ChannelMessageType::ChannelVoice(
+                                ChannelVoiceMessage::PitchBendChange(cvm::PitchBendChange {
+                                    value: cvm::Unsigned14::assert_from(bytes),
+                                })
+                            )
+                        })
+                    )
+                })
             }
             status_nibbles::SYSTEM_MESSAGE => {
                 todo!()
