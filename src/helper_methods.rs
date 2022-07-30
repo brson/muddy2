@@ -9,7 +9,7 @@ impl message::ChannelVoiceMessage {
     ///
     /// Returns `Some` if the note should be turned off,
     /// and the inner value is the off velocity.
-    fn is_note_off_equiv(&self) -> Option<cvm::KeyVelocity> {
+    pub fn is_note_off_equiv(&self) -> Option<cvm::KeyVelocity> {
         todo!()
     }
 }
