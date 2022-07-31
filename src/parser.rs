@@ -386,8 +386,80 @@ impl StatusByte {
                 })
             }
             status_nibbles::SYSTEM_MESSAGE => {
-                todo!()
+                self.parse_system_message(bytes)
             },
+            _ => {
+                unreachable!()
+            }
+        }
+    }
+
+    fn parse_system_message(&self, bytes: &[u8]) -> Result<MessageParseOutcome> {
+        match self.0 {
+            system_status_bytes::SYSTEM_COMMON_MIDI_TIME_QUARTER_FRAME => {
+                assert_eq!(bytes.len(), 1);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_COMMON_SONG_POSITION_POINTER => {
+                assert_eq!(bytes.len(), 2);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_COMMON_SONG_SELECT => {
+                assert_eq!(bytes.len(), 1);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_COMMON_UNDEFINED_1 => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_COMMON_UNDEFINED_2 => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_COMMON_TUNE_REQUEST => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_TIMING_CLOCK => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_UNDEFINED_1 => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_START => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_CONTINUE => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_STOP => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_UNDEFINED_2 => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_ACTIVE_SENSING => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_REALTIME_SYSTEM_RESET => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG => {
+                assert_eq!(bytes.len(), 0);
+                todo!()
+            }
+            system_status_bytes::SYSTEM_EXCLUSIVE => {
+                assert_eq!(bytes.last(), Some(&system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG));
+                todo!()
+            }
             _ => {
                 unreachable!()
             }
