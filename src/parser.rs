@@ -408,7 +408,18 @@ fn get_data_bytes(buf: &[u8], num: usize) -> DataBytes {
 }
 
 fn get_sysex_bytes(buf: &[u8]) -> DataBytes {
-    todo!()
+    for (index, byte) in buf.iter().enumerate() {
+        if is_status_byte(*byte) {
+            if *byte == system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG {
+                // NB: bytes includes the EOX marker
+                return DataBytes::Bytes(&buf[..index + 1]);
+            } else {
+                return DataBytes::InterruptingStatusByte { index };
+            }
+        }
+    }
+
+    DataBytes::NeedMore(None)
 }
 
 enum DataBytes<'buf> {
