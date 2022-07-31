@@ -164,11 +164,7 @@ impl Parser {
                             unreachable!()
                         },
                         MessageParseOutcomeStatus::UnexpectedEox => {
-                            self.running_status_byte = None;
-                            Ok(MessageParseOutcome {
-                                bytes_consumed: outcome.bytes_consumed,
-                                status: outcome.status,
-                            })
+                            unreachable!()
                         },
                         MessageParseOutcomeStatus::BrokenMessage => {
                             self.running_status_byte = None;
