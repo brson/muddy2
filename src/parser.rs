@@ -35,6 +35,8 @@ pub enum MessageParseOutcomeStatus {
     ///
     /// The unexpected byte is accounted for by [`MessageParseOutcome::bytes_consumed`].
     UnexpectedDataByte,
+    /// Encountered an End-of-SysEx status byte while not parsing a SysEx.
+    UnexpectedEox,
     /// A status byte was encountered while parsing a message.
     ///
     /// The broken message bytes are accounted for by [`MessageParseOutcome::bytes_consumed`].
@@ -112,6 +114,14 @@ impl Parser {
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
                         },
+                        MessageParseOutcomeStatus::UnexpectedEox => {
+                            // todo think harder about this case
+                            self.running_status_byte = self.running_status_byte;
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
+                        },
                         MessageParseOutcomeStatus::BrokenMessage => {
                             // todo think harder about this case
                             self.running_status_byte = self.running_status_byte;
@@ -153,6 +163,9 @@ impl Parser {
                             })
                         },
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
+                            unreachable!()
+                        },
+                        MessageParseOutcomeStatus::UnexpectedEox => {
                             unreachable!()
                         },
                         MessageParseOutcomeStatus::BrokenMessage => {
@@ -422,39 +435,98 @@ impl StatusByte {
             }
             system_status_bytes::SYSTEM_REALTIME_TIMING_CLOCK => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::TimingClock
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_REALTIME_UNDEFINED_1 => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::Undefined1
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_REALTIME_START => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::Start
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_REALTIME_CONTINUE => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::Continue
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_REALTIME_STOP => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::Stop
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_REALTIME_UNDEFINED_2 => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::Undefined2
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_REALTIME_ACTIVE_SENSING => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::ActiveSensing
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_REALTIME_SYSTEM_RESET => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::Message(
+                        Message::System(SystemMessage::SystemRealTime(
+                            SystemRealTimeMessage::SystemReset
+                        ))
+                    )
+                })
             }
             system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG => {
                 assert_eq!(bytes.len(), 0);
-                todo!()
+                Ok(MessageParseOutcome {
+                    bytes_consumed: 0,
+                    status: MessageParseOutcomeStatus::UnexpectedEox,
+                })
             }
             system_status_bytes::SYSTEM_EXCLUSIVE => {
                 assert_eq!(bytes.last(), Some(&system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG));

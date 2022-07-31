@@ -173,7 +173,20 @@ impl TryFrom<u8> for MidiChannelId {
 
 #[derive(Debug)]
 pub struct SystemCommonMessage;
+
 #[derive(Debug)]
-pub struct SystemRealTimeMessage;
+#[derive(IntoPrimitive, TryFromPrimitive)]
+#[repr(u8)]
+pub enum SystemRealTimeMessage {
+    TimingClock = 0xF8,
+    Undefined1 = 0xF9,
+    Start = 0xFA,
+    Continue = 0xFB,
+    Stop = 0xFC,
+    Undefined2 = 0xFD,
+    ActiveSensing = 0xFE,
+    SystemReset = 0xFF,
+}
+
 #[derive(Debug)]
 pub struct SystemExclusiveMessage;
