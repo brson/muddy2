@@ -14,6 +14,13 @@ pub struct MessageParseOutcome {
 #[derive(Debug)]
 pub enum MessageParseOutcomeStatus {
     Message(Message),
+    /// Need more bytes to parse a message.
+    ///
+    /// If the contained is `Some` that indicates the number of needed bytes;
+    /// if `None` then the number of bytes is unknown.
+    ///
+    /// The number of needed bytes is unknown if the provided buffer is empty,
+    /// or if parsing a SysEx message.
     NeedMoreBytes(Option<usize>),
     /// A real time message was encountered while parsing another message.
     /// This returns the message, along with the byte that contained it.
@@ -24,15 +31,6 @@ pub enum MessageParseOutcomeStatus {
         message: SystemRealTimeMessage,
         byte_index: usize,
     },
-    /// We are processing an arbitrary-sized sysex message and need to wait
-    /// until we have a see a status byte before we can do anything useful.
-    ///
-    /// The caller _can_ continue loading data and calling [`Parser::parse`],
-    /// but it is more efficient if the caller scans for a byte that passes
-    /// [`is_status_byte`] before trying to parse again.
-    ///
-    /// [`MessageParseOutcome::bytes_consumed`] will be 0.
-    WaitForStatusByte,
     /// A non-status byte was encountered while looking for a status byte.
     ///
     /// The unexpected byte is accounted for by [`MessageParseOutcome::bytes_consumed`].
@@ -111,13 +109,6 @@ impl Parser {
                                 }
                             })
                         },
-                        MessageParseOutcomeStatus::WaitForStatusByte => {
-                            assert_eq!(0, outcome.bytes_consumed);
-                            Ok(MessageParseOutcome {
-                                bytes_consumed: 0,
-                                status: MessageParseOutcomeStatus::WaitForStatusByte,
-                            })
-                        },
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
                         },
@@ -160,9 +151,6 @@ impl Parser {
                                     byte_index: byte_index,
                                 }
                             })
-                        },
-                        MessageParseOutcomeStatus::WaitForStatusByte => {
-                            unreachable!()
                         },
                         MessageParseOutcomeStatus::UnexpectedDataByte => {
                             unreachable!()
