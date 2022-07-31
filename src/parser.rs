@@ -115,16 +115,14 @@ impl Parser {
                             unreachable!()
                         },
                         MessageParseOutcomeStatus::UnexpectedEox => {
-                            // todo think harder about this case
-                            self.running_status_byte = self.running_status_byte;
+                            self.running_status_byte = None;
                             Ok(MessageParseOutcome {
                                 bytes_consumed: 1 + outcome.bytes_consumed,
                                 status: outcome.status,
                             })
                         },
                         MessageParseOutcomeStatus::BrokenMessage => {
-                            // todo think harder about this case
-                            self.running_status_byte = self.running_status_byte;
+                            self.running_status_byte = None;
                             Ok(MessageParseOutcome {
                                 bytes_consumed: 1 + outcome.bytes_consumed,
                                 status: outcome.status,
@@ -166,9 +164,14 @@ impl Parser {
                             unreachable!()
                         },
                         MessageParseOutcomeStatus::UnexpectedEox => {
-                            unreachable!()
+                            self.running_status_byte = None;
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
                         },
                         MessageParseOutcomeStatus::BrokenMessage => {
+                            self.running_status_byte = None;
                             Ok(MessageParseOutcome {
                                 bytes_consumed: outcome.bytes_consumed,
                                 status: outcome.status,
