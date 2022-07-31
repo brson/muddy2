@@ -245,7 +245,11 @@ impl StatusByte {
     }
 
     fn parse_exact_number_of_bytes(&self, bytes: &[u8]) -> Result<MessageParseOutcome> {
-        for byte in bytes { assert!(!is_status_byte(*byte)) }
+        if self.0 != system_status_bytes::SYSTEM_EXCLUSIVE {
+            // This check is potentially expensively-redundant for SysEx messages,
+            // and `bytes` also contains the EOX status byte.
+            for byte in bytes { assert!(!is_status_byte(*byte)) }
+        }
         let status_nibble = self.0 >> 4;
         let channel = MidiChannelId::assert_from(self.0 & 0b1111);
         match status_nibble {
