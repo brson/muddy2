@@ -139,7 +139,7 @@ impl Parser {
                     match outcome.status {
                         MessageParseOutcomeStatus::Message(Message::Channel(_)) => {
                             Ok(MessageParseOutcome {
-                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                bytes_consumed: outcome.bytes_consumed,
                                 status: outcome.status,
                             })
                         },
