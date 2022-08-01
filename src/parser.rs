@@ -4,16 +4,21 @@
 use anyhow::Result;
 use crate::message::*;
 use crate::assert_from::AssertFrom;        
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-pub struct MessageParseOutcome {
+pub struct MessageParseOutcome<'buf> {
     /// Caller should shift buffer by this number of bytes.
-    pub bytes_consumed: u8,
-    pub status: MessageParseOutcomeStatus,
+    pub bytes_consumed: usize,
+    pub status: MessageParseOutcomeStatus<'buf>,
 }
 
 #[derive(Debug)]
-pub enum MessageParseOutcomeStatus {
+pub enum MessageParseOutcomeStatus<'buf> {
     Message(Message),
+    /// System exclusive messages.
+    ///
+    /// These are returned as references to avoid allocation.
+    SystemExclusiveMessage(&'buf [u8]),
     /// Need more bytes to parse a message.
     ///
     /// If the contained is `Some` that indicates the number of needed bytes;
@@ -40,8 +45,6 @@ pub enum MessageParseOutcomeStatus {
     /// A status byte was encountered while parsing a message.
     ///
     /// The broken message bytes are accounted for by [`MessageParseOutcome::bytes_consumed`].
-    ///
-    /// TODO this is unused
     BrokenMessage,
 }
 
@@ -56,7 +59,7 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self, buf: &[u8]) -> Result<MessageParseOutcome> {
+    pub fn parse<'buf>(&mut self, buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
         let mut buf_iter = buf.iter();
 
         match buf_iter.next().copied() {
@@ -89,6 +92,13 @@ impl Parser {
                             })
                         },
                         MessageParseOutcomeStatus::Message(Message::System(_)) => {
+                            self.running_status_byte = None;
+                            Ok(MessageParseOutcome {
+                                bytes_consumed: 1 + outcome.bytes_consumed,
+                                status: outcome.status,
+                            })
+                        },
+                        MessageParseOutcomeStatus::SystemExclusiveMessage(_) => {
                             self.running_status_byte = None;
                             Ok(MessageParseOutcome {
                                 bytes_consumed: 1 + outcome.bytes_consumed,
@@ -144,6 +154,9 @@ impl Parser {
                         MessageParseOutcomeStatus::Message(_) => {
                             unreachable!()
                         },
+                        MessageParseOutcomeStatus::SystemExclusiveMessage(_) => {
+                            unreachable!()
+                        },
                         MessageParseOutcomeStatus::NeedMoreBytes(_) => {
                             assert_eq!(0, outcome.bytes_consumed);
                             Ok(outcome)
@@ -194,7 +207,7 @@ fn is_status_byte(byte: u8) -> bool {
 struct StatusByte(u8);
 
 impl StatusByte {
-    pub fn parse(&self, buf: &[u8]) -> Result<MessageParseOutcome> {
+    pub fn parse<'buf>(&self, buf: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
         let status_nibble = self.0 >> 4;
         let data_bytes = self.data_bytes(buf);
         match data_bytes {
@@ -208,9 +221,20 @@ impl StatusByte {
                 })
             }
             DataBytes::InterruptingStatusByte { index } => {
-                /// case: system realtime messages
-                /// case: broken messages
-                todo!()
+                if let Ok(msg) = SystemRealTimeMessage::try_from_primitive(buf[index]) {
+                    Ok(MessageParseOutcome {
+                        bytes_consumed: 0,
+                        status: MessageParseOutcomeStatus::InterruptingSystemRealTimeMessage {
+                            message: msg,
+                            byte_index: index,
+                        }
+                    })
+                } else {
+                    Ok(MessageParseOutcome {
+                        bytes_consumed: index,
+                        status: MessageParseOutcomeStatus::BrokenMessage,
+                    })
+                }
             }
         }
     }
@@ -256,7 +280,7 @@ impl StatusByte {
         }
     }
 
-    fn parse_exact_number_of_bytes(&self, bytes: &[u8]) -> Result<MessageParseOutcome> {
+    fn parse_exact_number_of_bytes<'buf>(&self, bytes: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
         if self.0 != system_status_bytes::SYSTEM_EXCLUSIVE {
             // This check is potentially expensively-redundant for SysEx messages,
             // and `bytes` also contains the EOX status byte.
@@ -406,7 +430,7 @@ impl StatusByte {
         }
     }
 
-    fn parse_system_message(&self, bytes: &[u8]) -> Result<MessageParseOutcome> {
+    fn parse_system_message<'buf>(&self, bytes: &'buf [u8]) -> Result<MessageParseOutcome<'buf>> {
         match self.0 {
             system_status_bytes::SYSTEM_COMMON_MIDI_TIME_QUARTER_FRAME => {
                 assert_eq!(bytes.len(), 1);
@@ -529,7 +553,11 @@ impl StatusByte {
             }
             system_status_bytes::SYSTEM_EXCLUSIVE => {
                 assert_eq!(bytes.last(), Some(&system_status_bytes::SYSTEM_END_OF_SYSTEM_EXCLUSIVE_FLAG));
-                todo!()
+                let sysex_buf = &bytes[..bytes.len() - 1];
+                Ok(MessageParseOutcome {
+                    bytes_consumed: bytes.len(),
+                    status: MessageParseOutcomeStatus::SystemExclusiveMessage(sysex_buf),
+                })
             }
             _ => {
                 unreachable!()
