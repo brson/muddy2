@@ -85,12 +85,16 @@ pub mod cvm {
     pub use super::u14::Unsigned14;
 
     #[derive(Debug)]
+    #[derive(Copy, Clone)]
     pub struct NoteNumber(pub Unsigned7);
     #[derive(Debug)]
+    #[derive(Copy, Clone)]
     pub struct KeyVelocity(pub Unsigned7);
     #[derive(Debug)]
+    #[derive(Copy, Clone)]
     pub struct ControlNumber(pub Unsigned7); // todo restrict range to < 120
     #[derive(Debug)]
+    #[derive(Copy, Clone)]
     pub struct ProgramNumber(pub Unsigned7);
 
     #[derive(Debug)]
@@ -190,3 +194,37 @@ pub enum SystemRealTimeMessage {
 
 #[derive(Debug)]
 pub struct SystemExclusiveMessage;
+
+impl ChannelVoiceMessage {
+    pub fn should_note_on(&self) -> Option<(cvm::NoteNumber, cvm::KeyVelocity)> {
+        match self {
+            ChannelVoiceMessage::NoteOn(note_on) => {
+                let velocity = u8::from(note_on.velocity.0);
+                if velocity != 0 {
+                    Some((note_on.note_number, note_on.velocity))
+                } else {
+                    None
+                }
+            }
+            _ => None
+        }
+    }
+
+    pub fn should_note_off(&self) -> Option<(cvm::NoteNumber, cvm::KeyVelocity)> {
+        match self {
+            ChannelVoiceMessage::NoteOn(note_on) => {
+                // "note on" + velocity 0 is commonly used to mean "note off"
+                let velocity = u8::from(note_on.velocity.0);
+                if velocity == 0 {
+                    Some((note_on.note_number, note_on.velocity))
+                } else {
+                    None
+                }
+            }
+            ChannelVoiceMessage::NoteOff(note_off) => {
+                Some((note_off.note_number, note_off.velocity))
+            }
+            _ => None
+        }
+    }
+}
